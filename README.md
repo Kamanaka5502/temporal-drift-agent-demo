@@ -44,3 +44,30 @@ Nothing changed except **time** and **state accumulation**.
 This is a simplified illustration of temporal drift in AI systems and agents operating in live environments.
 
 It shows how systems can pass validation, then fail in production purely due to unmanaged memory and time-dependent logic.
+
+## Expected Output
+
+The agent starts by allowing input:
+
+Recent events: 1 → ALLOW
+
+Then within seconds:
+
+Recent events: 3 → DENY  
+Recent events: 4 → DENY  
+Recent events: 5 → DENY  
+
+Nothing changed except time and accumulated state.
+
+## How this maps to real systems
+
+This same pattern appears in:
+
+- Agents that rely on sliding time windows
+- Retry loops that append state without pruning
+- Evaluation pipelines that pass tests but fail after hours or days
+- Systems where "recent context" is used without lifecycle management
+
+This is not a model failure.
+
+This is a control-plane and time-handling failure.
