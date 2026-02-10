@@ -7,6 +7,18 @@ This is a minimal demonstration of a failure pattern seen in long-running AI/age
 
 The result is a system that works correctly at first, then begins denying valid inputs as internal state accumulates.
 
+## The subtle trap
+
+The logic is correct.
+
+The timestamps are correct.
+
+The decisions are correct.
+
+The system still fails.
+
+Because no one is managing how time interacts with accumulated state.
+
 This demo shows how:
 
 - Memory grows on every interaction
@@ -45,6 +57,18 @@ This is a simplified illustration of temporal drift in AI systems and agents ope
 
 It shows how systems can pass validation, then fail in production purely due to unmanaged memory and time-dependent logic.
 
+## Why this passes validation
+
+This system passes basic testing because:
+
+- Each individual decision is correct
+- The logic works in isolation
+- Short test runs never trigger the failure
+- No exception is thrown
+- No obvious bug exists
+
+The failure only appears after time + memory accumulation.
+
 ## Expected Output
 
 The agent starts by allowing input:
@@ -71,3 +95,14 @@ This same pattern appears in:
 This is not a model failure.
 
 This is a control-plane and time-handling failure.
+
+## The real production version of this problem
+
+In real AI/agent systems this looks like:
+
+- Agents that begin refusing valid user requests after running for hours
+- Evaluation pipelines that degrade over time without code changes
+- Retry and logging systems that slowly poison decision context
+- Systems that "feel fine" in staging but fail in production
+
+This demo compresses hours of drift into 10 seconds.
