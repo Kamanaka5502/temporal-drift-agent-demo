@@ -17,7 +17,7 @@ The decisions are correct.
 
 The system still fails.
 
-Because no one is managing the lifecycle of state as time passes.
+Because no one is managing the lifecycle of state as time passes through the system.
 
 This demo shows how:
 
@@ -66,6 +66,7 @@ This system passes basic testing because:
 - Short test runs never trigger the failure
 - No exception is thrown
 - No obvious bug exists
+- The failure is temporal, not logical
 
 The failure only appears after time + memory accumulation.
 
@@ -115,7 +116,8 @@ If you see any of these, you likely have temporal drift:
 - Systems that require periodic restarts to "behave normally"
 - Increasing false denials after long uptime
 - Logs or retries being included in decision context
-- "Recent context" used without explicit pruning rules
+- Recent context" used without explicit pruning rules
+- Behavior that changes with uptime, not code changes
 
 - ## Why this demo is intentionally small
 
@@ -131,4 +133,6 @@ Nothing is wrong with the logic.
 
 The system is failing because time is being treated as passive,
 when it is an active participant in state.
+
+If your system improves after a restart, you are not fixing a bug. You are resetting time.
 
