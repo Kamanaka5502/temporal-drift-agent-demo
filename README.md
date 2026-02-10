@@ -1,19 +1,45 @@
-cat << 'EOF' > LICENSE
-MIT License
+# Temporal Drift Agent Demo
 
-Copyright (c) 2026 Samantha Revita-Wagner
+This is a minimal demonstration of a failure pattern seen in long-running AI/agent systems:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, subject to the following conditions:
+**decision logic that depends on “recency” without managing memory over time.**
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The result is a system that works correctly at first, then begins denying valid inputs as internal state accumulates.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
-EOF
+This demo shows how:
+
+- Memory grows on every interaction
+- Decisions depend on time-window filtering
+- Old state is never cleared
+- The system drifts into permanent denial
+
+This is not a bug in logic.
+It is a bug in **time handling**.
+
+## What this demonstrates
+
+Many agent failures in production are not caused by bad prompts or bad models, but by:
+
+- Timestamp reliance without pruning
+- Retry loops that stack state
+- Context windows that grow silently
+- Systems that pass tests but fail after running for a while
+
+This script recreates that behavior in under 30 lines.
+
+## Run
+
+python agent.py
+
+Then observe the rapid fire test.
+
+The agent begins by allowing input.
+Within seconds, it begins denying everything.
+
+Nothing changed except **time** and **state accumulation**.
+
+## Why this matters
+
+This is a simplified illustration of temporal drift in AI systems and agents operating in live environments.
+
+It shows how systems can pass validation, then fail in production purely due to unmanaged memory and time-dependent logic.
