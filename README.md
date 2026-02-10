@@ -17,7 +17,7 @@ The decisions are correct.
 
 The system still fails.
 
-Because no one is managing how time interacts with accumulated state.
+Because no one is managing the lifecycle of state as time passes.
 
 This demo shows how:
 
@@ -106,3 +106,19 @@ In real AI/agent systems this looks like:
 - Systems that "feel fine" in staging but fail in production
 
 This demo compresses hours of drift into 10 seconds.
+
+## What to look for in your own systems
+
+If you see any of these, you likely have temporal drift:
+
+- Decisions that get stricter over time without rule changes
+- Systems that require periodic restarts to "behave normally"
+- Increasing false denials after long uptime
+- Logs or retries being included in decision context
+- "Recent context" used without explicit pruning rules
+
+Nothing is wrong with the logic.
+
+The system is failing because time is being treated as passive,
+when it is an active participant in state.
+
