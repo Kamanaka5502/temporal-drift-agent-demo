@@ -136,3 +136,8 @@ when it is an active participant in state.
 
 If your system improves after a restart, you are not fixing a bug. You are resetting time.
 
+---
+
+If your system improves after a restart, you are not fixing a bug.
+
+You are resetting time.
