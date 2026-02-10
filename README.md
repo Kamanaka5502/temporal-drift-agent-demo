@@ -1,5 +1,6 @@
 # Temporal Drift Agent Demo
 
+A 30-line reproduction of a real failure mode in long-running AI/agent systems.
 This is a minimal demonstration of a failure pattern seen in long-running AI/agent systems:
 
 **decision logic that depends on “recency” without managing memory over time.**
