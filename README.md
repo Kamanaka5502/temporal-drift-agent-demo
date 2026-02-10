@@ -117,6 +117,16 @@ If you see any of these, you likely have temporal drift:
 - Logs or retries being included in decision context
 - "Recent context" used without explicit pruning rules
 
+- ## Why this demo is intentionally small
+
+This is not a framework.
+This is not a solution.
+This is not a pattern to copy.
+
+It is a microscope.
+
+The smaller the example, the harder it is to dismiss the problem.
+
 Nothing is wrong with the logic.
 
 The system is failing because time is being treated as passive,
