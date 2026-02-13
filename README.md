@@ -1,143 +1,165 @@
-# Temporal Drift Agent Demo
+## Temporal Drift in Long-Running Agent Systems
 
-A 30-line reproduction of a real failure mode in long-running AI/agent systems.
-This is a minimal demonstration of a failure pattern seen in long-running AI/agent systems:
+A minimal reproduction of a production failure mode in long-running AI/agent systems.
 
-**decision logic that depends on “recency” without managing memory over time.**
+This demo shows how decision logic that depends on recency can silently fail over time when state is allowed to accumulate without lifecycle management.
 
-The result is a system that works correctly at first, then begins denying valid inputs as internal state accumulates.
-
-## The subtle trap
-
-The logic is correct.
-
-The timestamps are correct.
-
-The decisions are correct.
-
+The logic remains correct.
+The timestamps remain correct.
 The system still fails.
 
-Because no one is managing the lifecycle of state as time passes through the system.
-
-This demo shows how:
-
-- Memory grows on every interaction
-- Decisions depend on time-window filtering
-- Old state is never cleared
-- The system drifts into permanent denial
-
 This is not a bug in logic.
-It is a bug in **time handling**.
+It is a bug in time handling.
 
-## What this demonstrates
+## The Core Failure Pattern
 
-Many agent failures in production are not caused by bad prompts or bad models, but by:
+Many AI systems rely on recency-based rules:
 
-- Timestamp reliance without pruning
-- Retry loops that stack state
-- Context windows that grow silently
-- Systems that pass tests but fail after running for a while
+“Reject repeated requests within N seconds.”
 
-This script recreates that behavior in under 30 lines.
+“Ignore duplicate events within a sliding window.”
 
-## Run
+“Suppress retry spam.”
 
-python agent.py
+“Avoid reprocessing recent inputs.”
 
-Then observe the rapid fire test.
+These rules are valid.
 
-The agent begins by allowing input.
-Within seconds, it begins denying everything.
+The failure emerges when:
 
-Nothing changed except **time** and **state accumulation**.
+Memory grows on every interaction.
 
-## Why this matters
+Decisions depend on time-window filtering.
 
-This is a simplified illustration of temporal drift in AI systems and agents operating in live environments.
+Old state is never pruned.
 
-It shows how systems can pass validation, then fail in production purely due to unmanaged memory and time-dependent logic.
+The filter’s operating domain expands over time.
 
-## Why this passes validation
+Eventually, the system denies valid inputs — permanently.
 
-This system passes basic testing because:
+The drift is gradual.
+It passes tests.
+It fails in production.
 
-- Each individual decision is correct
-- The logic works in isolation
-- Short test runs never trigger the failure
-- No exception is thrown
-- No obvious bug exists
-- The failure is temporal, not logical
+## Concrete Example
 
-The failure only appears after time + memory accumulation.
+Imagine an agent that denies repeated requests within 10 seconds.
 
-## Expected Output
+Each request timestamp is appended to an internal list.
 
-The agent starts by allowing input:
+Filtering checks:
 
-Recent events: 1 → ALLOW
+“Does any timestamp exist within the last 10 seconds?”
 
-Then within seconds:
+If yes → deny.
 
-Recent events: 3 → DENY  
-Recent events: 4 → DENY  
-Recent events: 5 → DENY  
+If old timestamps are never pruned, the list grows indefinitely.
 
-Nothing changed except time and accumulated state.
+Under sustained traffic, the density of timestamps increases.
+Eventually, nearly every new request falls within 10 seconds of some prior request.
 
-## How this maps to real systems
+The system transitions from selective denial to permanent denial.
 
-This same pattern appears in:
+No logic changed.
+The system simply accumulated time without governing it.
 
-- Agents that rely on sliding time windows
-- Retry loops that append state without pruning
-- Evaluation pipelines that pass tests but fail after hours or days
-- Systems where "recent context" is used without lifecycle management
+## Minimal Reproduction
 
-This is not a model failure.
+This script recreates the failure in under 30 lines.
 
-This is a control-plane and time-handling failure.
+The agent:
 
-## The real production version of this problem
+Stores timestamps for each request.
 
-In real AI/agent systems this looks like:
+Denies requests if a recent one exists within a defined window.
 
-- Agents that begin refusing valid user requests after running for hours
-- Evaluation pipelines that degrade over time without code changes
-- Retry and logging systems that slowly poison decision context
-- Systems that "feel fine" in staging but fail in production
+Never removes old timestamps.
 
-This demo compresses hours of drift into 10 seconds.
+State evolution:
 
-## What to look for in your own systems
+t1
+t1, t2
+t1, t2, t3
+...
+t1, t2, ... tN
 
-If you see any of these, you likely have temporal drift:
 
-- Decisions that get stricter over time without rule changes
-- Systems that require periodic restarts to "behave normally"
-- Increasing false denials after long uptime
-- Logs or retries being included in decision context
-- Recent context" used without explicit pruning rules
-- Behavior that changes with uptime, not code changes
+Without pruning, the decision boundary expands as historical state accumulates.
 
-- ## Why this demo is intentionally small
+At first, the system behaves correctly.
 
-This is not a framework.
-This is not a solution.
-This is not a pattern to copy.
+As interactions accumulate, the state list grows.
+Filtering becomes biased by historical density.
+The agent begins rejecting valid requests.
 
-It is a microscope.
+Nothing is broken syntactically.
+The model is not hallucinating.
+The logic is correct.
 
-The smaller the example, the harder it is to dismiss the problem.
+The system drifts because time was treated as an attribute — not as a lifecycle dimension.
 
-Nothing is wrong with the logic.
+## Why Tests Don’t Catch It
 
-The system is failing because time is being treated as passive,
-when it is an active participant in state.
+Unit tests typically:
 
-If your system improves after a restart, you are not fixing a bug. You are resetting time.
+Run for short durations.
 
----
+Reset state between test cases.
 
-If your system improves after a restart, you are not fixing a bug.
+Validate correctness under low iteration counts.
 
-You are resetting time.
+Temporal drift only emerges under sustained execution.
+
+Systems that appear stable in CI pipelines can fail after hours or days of runtime.
+
+This class of failure is invisible to prompt tuning and model swapping.
+
+It is architectural.
+
+## Production Implications
+
+This pattern appears in:
+
+LLM context accumulation
+
+Retry loops with timestamp tracking
+
+Fraud detection throttling systems
+
+Rate limiters without pruning
+
+Agents that store interaction logs indefinitely
+
+AI systems are stateful over time.
+
+If state grows but is never governed, entropy accumulates.
+
+Over time, the system begins optimizing against stale context or dense historical residue.
+
+That is drift.
+
+## General Principle
+
+Any system that makes decisions based on time-bounded conditions must also manage the lifecycle of time-bounded state.
+
+If you enforce a sliding window in logic, you must enforce a sliding window in memory.
+
+Without symmetry between decision rules and state pruning, drift is inevitable.
+
+## The Takeaway
+
+Most AI production failures are not caused by bad prompts or bad models.
+
+They are caused by:
+
+Timestamp reliance without pruning
+
+Retry loops that stack state
+
+Context windows that grow silently
+
+Systems that pass tests but fail under duration
+
+Durability requires explicit lifecycle management of state.
+
+Time must be treated as a first-class architectural constraint.
